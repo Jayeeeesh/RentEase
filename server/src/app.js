@@ -101,6 +101,14 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Root Route
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'RentEase API Running',
+  });
+});
+
 // Swagger Docs
 if (process.env.NODE_ENV !== 'production') {
   app.use(
