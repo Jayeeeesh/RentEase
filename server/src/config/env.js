@@ -9,4 +9,5 @@ module.exports = {
   JWT_ACCESS_EXPIRES: process.env.JWT_ACCESS_EXPIRES,
   JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES,
   CLIENT_URL: process.env.CLIENT_URL,
+  API_VERSION: process.env.API_VERSION || '/api/v1',
 };
