@@ -1,4 +1,3 @@
-require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +19,7 @@ const swaggerSpec = require('./config/swagger');
 
 const app = express();
 
-const API_VERSION = '/api/v1';
+const { API_VERSION } = require('./config/env')
 
 // Trust Proxy (for rate limiting and secure cookies)
 app.set('trust proxy', 1);

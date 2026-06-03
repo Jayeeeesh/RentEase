@@ -26,7 +26,32 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['customer', 'admin'],
         default: 'customer'
-    }
+    },
+    refreshToken: {
+        type: String,
+        select: false
+    },
+    phone: {
+        type: String,
+        trim: true
+    },
+    avatar: {
+        type: String,
+    },
+    address: {
+        street: String,
+        city: String,
+        state: String,
+        pincode: String,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

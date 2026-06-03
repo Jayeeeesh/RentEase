@@ -2,6 +2,9 @@ const app = require('./app');
 const connectDB = require('./config/db');
 const { PORT } = require('./config/env');
 const mongoose = require('mongoose');
+require('dotenv').config();
+const app = require('./app');
+
 const startServer = async () => {
   try {
     await connectDB();
