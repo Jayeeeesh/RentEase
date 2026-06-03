@@ -1,5 +1,10 @@
+const ApiError = require('../../utils/ApiError');
+
+
 const errorHandler = (err, req, res, next) => {
-  res.status(err.statusCode || 500).json({
+const statusCode = err instanceof ApiError ? err.statusCode : 500;
+
+  res.status(statusCode).json({
     success: false,
     message:
       process.env.NODE_ENV === 'production'
