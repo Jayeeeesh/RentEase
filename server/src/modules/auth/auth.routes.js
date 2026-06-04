@@ -1,10 +1,8 @@
 const express = require('express');
-
 const router = express.Router();
+const { register } = require('./auth.controller');
 
-router.post('/register', (req, res) => {
-    res.json({ message: 'User registration endpoint' });
-});
+router.post('/register', register);
 
 router.post('/login', (req, res) => {
     res.json({ message: 'User login endpoint' });
