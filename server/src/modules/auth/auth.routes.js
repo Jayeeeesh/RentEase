@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { register } = require('./auth.controller');
+const { register, login } = require('./auth.controller');
 
 router.post('/register', register);
 
-router.post('/login', (req, res) => {
-    res.json({ message: 'User login endpoint' });
-});
+router.post('/login', login);
 
 router.post('/refresh-token', (req, res) => {
     res.json({ message: 'Token refresh endpoint' });
