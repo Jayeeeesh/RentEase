@@ -125,16 +125,16 @@ const login = asyncHandler(async (req, res) => {
         process.env.JWT_REFRESH_SECRET,
         { expiresIn: process.env.JWT_REFRESH_EXPIRES }
     );
-
+    // Store refresh token in database for later verification during token refresh
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
-    // Remove sensitive fields before sending response
+    // httpOnly prevents XSS attacks, secure ensures HTTPS only in production
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     });
 
     const { password: _, refreshToken: __, ...userData } = user.toObject();
@@ -144,4 +144,5 @@ const login = asyncHandler(async (req, res) => {
 
 });
 
+// Export controller functions for use in routes
 module.exports = { register, login };
