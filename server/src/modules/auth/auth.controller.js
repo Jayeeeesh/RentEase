@@ -7,6 +7,15 @@ const bcrypt = require('bcryptjs'); // Password hashing library
 const jwt = require('jsonwebtoken'); // JSON Web Token library for authentication
 
 
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+
 /**
  * @desc Register a new user account
  * @param {Object} req - Express request object with name, email, password in body
@@ -129,13 +138,8 @@ const login = asyncHandler(async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
-    // httpOnly prevents XSS attacks, secure ensures HTTPS only in production
-    res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-    });
+    // Set refresh token in secure, HTTP-only cookie to prevent XSS access
+    res.cookie('refreshToken', refreshToken, cookieOptions);
 
     const { password: _, refreshToken: __, ...userData } = user.toObject();
     return res.status(200).json(
@@ -144,5 +148,105 @@ const login = asyncHandler(async (req, res) => {
 
 });
 
+/**
+ * @desc Logout user by clearing refresh token cookie and database field
+ * @param {Object} req - Express request object with user ID from auth middleware
+ * @param {Object} res - Express response object
+ * @return {Object} Success message (status 200)
+ * @throw {ApiError} 401 - Unauthorized if user not authenticated
+ */
+const logout = asyncHandler(async (req, res) => {
+    const userId = req.user._id; // Get user ID from authenticated request
+
+    // Find user in database and clear refresh token field
+    await User.findByIdAndUpdate(
+        req.user._id,
+        { refreshToken: null },
+        { new: true }
+    ); 
+
+    // Clear refresh token cookie from client
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+    });
+
+    return res.status(200).json(new ApiResponse(200, null, 'Logout successful'));
+});
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+        throw new ApiError(401, 'Unauthorized');
+    }
+
+    let decodedToken;
+
+    try {
+        decodedToken = jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET
+        );
+    } catch {
+        throw new ApiError(401, 'Unauthorized');
+    }
+
+    const user = await User.findById(decodedToken._id)
+        .select('+refreshToken');
+
+    if (!user || user.refreshToken !== refreshToken) {
+        throw new ApiError(401, 'Unauthorized');
+    }
+
+    const accessToken = jwt.sign(
+        {
+            _id: user._id,
+            role: user.role,
+        },
+        process.env.JWT_ACCESS_SECRET,
+        {
+            expiresIn: process.env.JWT_ACCESS_EXPIRES,
+        }
+    );
+
+    const newRefreshToken = jwt.sign(
+        {
+            _id: user._id,
+        },
+        process.env.JWT_REFRESH_SECRET,
+        {
+            expiresIn: process.env.JWT_REFRESH_EXPIRES,
+        }
+    );
+
+    user.refreshToken = newRefreshToken;
+
+    await user.save({
+        validateBeforeSave: false,
+    });
+
+
+    res.cookie(
+        'refreshToken',
+        newRefreshToken,
+        cookieOptions
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                accessToken,
+            },
+            'Access token refreshed successfully'
+        )
+    );
+});
+
+    
+
+
 // Export controller functions for use in routes
-module.exports = { register, login };
+module.exports = { register, login, logout, refreshAccessToken };
