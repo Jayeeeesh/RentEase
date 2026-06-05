@@ -17,21 +17,66 @@ const productSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    price: {
+    category: {
+        type: String,
+        required: true,
+        enum: ['furniture', 'appliance'], // Restrict to predefined categories
+        trim: true
+    },
+    subcategory: {
+        type: String,
+        trim: true,
+        enum: ['bed', 'sofa', 'table', 'fridge', 'washing_machine', 'tv'] // Example subcategories
+    },
+    monthlyRentalPrice: {
         type: Number,
         required: true,
         min: 0
     },
-    stock: {
+    securityDeposit: {
         type: Number,
         required: true,
         min: 0
     },
-    category: { 
-        type: String, 
-        required: true, 
-        trim: true 
+    minTenureMonths: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    maxTenureMonths: {
+        type: Number,
+        required: true,
+        min: 1,
+        validate: {
+            validator: function (value) {
+                return value >= this.minTenureMonths;
+            },
+            message: 'maxTenureMonths must be greater than or equal to minTenureMonths'
+        }
+    },
+    isAvailableForRent: {
+        type: Boolean,
+        default: true,
+        required: true
+    },
+    city: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
+
+
 }, { timestamps: true }); // ✅ createdAt + updatedAt auto
 
 const Product = mongoose.model('Product', productSchema);
