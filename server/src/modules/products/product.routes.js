@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-
-router.get('/',        (req, res) => res.json({ message: 'Get all products' }));
-router.post('/',       (req, res) => res.json({ message: 'Create product' }));
-router.get('/:id',     (req, res) => res.json({ message: `Get product ${req.params.id}` }));
-router.put('/:id',     (req, res) => res.json({ message: `Update product ${req.params.id}` }));
-router.delete('/:id',  (req, res) => res.json({ message: `Delete product ${req.params.id}` }));
-
+const { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct } = require('./product.controller');
+const authMiddleware = require('../../middleware/auth.middleware');
+// Public routes for retrieving products
+router.get('/',       getAllProducts);
+router.get('/:id',    getProductById);
+// Only allow authenticated users to create, update, or delete products
+router.post('/',       authMiddleware,   createProduct);
+router.put('/:id',     authMiddleware,  updateProduct);
+router.delete('/:id',  authMiddleware,  deleteProduct);
 module.exports = router;
