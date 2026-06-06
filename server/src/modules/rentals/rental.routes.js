@@ -1,9 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const { createRental, getUserRentals, getRentalById, updateRentalStatus, cancelRental } = require('./rental.controller');
+const authMiddleware = require('../../middleware/auth.middleware');
 
-router.get('/',       (req, res) => res.json({ message: 'Get all rentals' }));
-router.post('/',      (req, res) => res.json({ message: 'Create rental' }));
-router.get('/:id',    (req, res) => res.json({ message: `Get rental ${req.params.id}` }));
-router.patch('/:id',  (req, res) => res.json({ message: `Update rental ${req.params.id}` }));
+// All rental routes require authentication
+router.get('/',               authMiddleware, getUserRentals);
+router.post('/',              authMiddleware, createRental);
+router.get('/:id',            authMiddleware, getRentalById);
+router.patch('/:id/cancel',   authMiddleware, cancelRental);
+router.patch('/:id/status',   authMiddleware, updateRentalStatus);
 
 module.exports = router;
