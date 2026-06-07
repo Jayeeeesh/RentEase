@@ -137,8 +137,8 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
     // Check if product has active rentals before deleting
     //  Cannot delete product with active rentals
-    // const activeRentals = await Rental.exists({ product: id, status: 'active' });
-    // if (activeRentals) throw new ApiError(400, 'Cannot delete product with active rentals');
+     const activeRentals = await Rental.exists({ product: id, status: 'active' });
+     if (activeRentals) throw new ApiError(400, 'Cannot delete product with active rentals');
 
     await product.deleteOne();
 
