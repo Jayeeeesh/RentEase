@@ -25,33 +25,9 @@ const cookieOptions = {
  */
 
 const register = asyncHandler(async (req, res) => {
+
     // Extract user credentials from request body
     const { name, email, password } = req.body;
-
-    // Validate required fields (trim() removes whitespace, check if empty)
-    if (!name?.trim() || !email?.trim() || !password) {
-        throw new ApiError(400, 'All fields are required');
-    }
-
-    // Enforce minimum password length for security
-    if (password.length < 8) {
-        throw new ApiError(400, 'Password must be at least 8 characters');
-    }
-
-    // Validate password strength: must contain uppercase, lowercase, and number
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
-    if (!passwordRegex.test(password)) {
-        throw new ApiError(
-            400,
-            'Password must contain uppercase, lowercase and a number'
-        );
-    }
-
-    // Validate email format using regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-        throw new ApiError(400, 'Please provide a valid email address');
-    }
 
     // Normalize inputs: convert email to lowercase and trim whitespace to ensure consistency
     const normalizedEmail = email.toLowerCase().trim();
@@ -97,15 +73,8 @@ const login = asyncHandler(async (req, res) => {
     // Extract credentials from request body
     const { email, password } = req.body;
 
-    // Validate required login fields
-    if (!email?.trim() || !password) {
-        throw new ApiError(400, 'Email and password are required');
-    }
-
-    // Normalize email before database lookup
-    const normalizedEmail = email.toLowerCase().trim();
     // Fetch user and explicitly include password field (may be excluded by default)
-    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+    const user = await User.findOne({ email }).select('+password');
 
     // Generic error message prevents email enumeration attacks
     if (!user) {

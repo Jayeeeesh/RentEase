@@ -23,4 +23,18 @@ const registerSchema = Joi.object({
         }),
 });
 
-module.exports = registerSchema;
+const loginSchema = Joi.object({
+    email: Joi.string()
+        .trim()
+        .lowercase()
+        .email()
+        .required(),
+
+    password: Joi.string()
+        .required(),
+});
+
+module.exports = {
+    registerSchema,
+    loginSchema,
+};
