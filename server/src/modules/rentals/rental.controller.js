@@ -191,9 +191,5 @@ const cancelRental = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-    createRental,
-    getUserRentals,
-    getRentalById,
-    updateRentalStatus,
-    cancelRental
+    x
 };
