@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, isAdmin } = require('../../middleware/auth.middleware');
+const { createOrder, getUserOrders, getOrderById, updateOrderStatus } = require('./order.controller');
 
-router.get('/',       (req, res) => res.json({ message: 'Get all orders' }));
-router.post('/',      (req, res) => res.json({ message: 'Create order' }));
-router.get('/:id',    (req, res) => res.json({ message: `Get order ${req.params.id}` }));
-router.patch('/:id',  (req, res) => res.json({ message: `Update order ${req.params.id}` }));
+router.get('/', authMiddleware, getUserOrders);
+router.post('/', authMiddleware, createOrder);
+router.get('/:id', authMiddleware, getOrderById);
+router.patch('/:id', authMiddleware, isAdmin, updateOrderStatus);
 
 module.exports = router;
