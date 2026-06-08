@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, isAdmin } = require('../../middleware/auth.middleware');
+const { getProfile, updateProfile, changePassword, getUserById, updateUser, deleteUser } = require('./user.controller');
 
-router.get('/', (req, res) => res.json({ message: 'Get all users' }));
-router.post('/', (req, res) => res.json({ message: 'Create user' }));      
-router.get('/:id', (req, res) => res.json({ message: `Get user ${req.params.id}` }));
-router.put('/:id', (req, res) => res.json({ message: `Update user ${req.params.id}` }));
-router.patch('/:id', (req, res) => res.json({ message: `Update user ${req.params.id}` }));
-router.delete('/:id', (req, res) => res.json({ message: `Delete user ${req.params.id}` }));
+// Current logged-in user
+router.get('/me', authMiddleware, getProfile);
+router.patch('/me', authMiddleware, updateProfile);
+router.patch('/me/password', authMiddleware, changePassword);
+
+// Admin routes
+router.get('/:id', authMiddleware, isAdmin, getUserById);
+router.patch('/:id', authMiddleware, isAdmin, updateUser);
+router.delete('/:id', authMiddleware, isAdmin, deleteUser);
 
 module.exports = router;

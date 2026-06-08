@@ -67,14 +67,16 @@ const getUserRentals = asyncHandler(async (req, res) => {
 
     const { status, page = 1, limit = 10 } = req.query;
 
-
     const filter = { user: req.user._id };
     if (status) filter.status = status;
 
-
     const total = await Rental.countDocuments(filter);
-    if (!total) throw new ApiError(404, 'No rentals found');
 
+    if (!total) {
+        return res.status(200).json(
+            new ApiResponse(200, { rentals: [], pagination: { total: 0, page: 1, limit: parseInt(limit), totalPages: 0 } }, 'No rentals found')
+        );
+    }
 
     const rentals = await Rental.find(filter)
         .populate('product', 'name monthlyRentalPrice images city')
@@ -191,5 +193,10 @@ const cancelRental = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-    x
+    createRental,
+    getUserRentals,
+    getRentalById,
+    updateRentalStatus,
+    cancelRental
+
 };

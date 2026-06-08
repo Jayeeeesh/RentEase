@@ -26,4 +26,11 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     next();
 });
 
-module.exports = authMiddleware;    
+const isAdmin = asyncHandler(async (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        throw new ApiError(403, 'Admin access required');
+    }
+    next();
+});
+
+module.exports = { authMiddleware, isAdmin };    
