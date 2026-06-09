@@ -1,9 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, isAdmin } = require('../../middleware/auth.middleware');
+const { createRequest, getUserRequests, getRequestById, updateRequestStatus } = require('./maintenance.controller');
 
-router.get('/',      (req, res) => res.json({ message: 'Get all maintenance requests' }));
-router.post('/',     (req, res) => res.json({ message: 'Create maintenance request' }));
-router.get('/:id',   (req, res) => res.json({ message: `Get request ${req.params.id}` }));
-router.patch('/:id', (req, res) => res.json({ message: `Update request ${req.params.id}` }));
+// User routes
+router.post('/', authMiddleware, createRequest);
+router.get('/', authMiddleware, getUserRequests);
+router.get('/:id', authMiddleware, getRequestById);
+
+// Admin routes
+router.patch('/:id', authMiddleware, isAdmin, updateRequestStatus);
 
 module.exports = router;
