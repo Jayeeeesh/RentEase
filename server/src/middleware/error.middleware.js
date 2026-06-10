@@ -9,7 +9,7 @@ const statusCode = err instanceof ApiError ? err.statusCode : 500;
     message:
       process.env.NODE_ENV === 'production'
         ? 'Internal Server Error'
-        : err.message,
+        : err.message ,
   });
 };
 
