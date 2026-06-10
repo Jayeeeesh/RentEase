@@ -3,7 +3,7 @@ const ApiError = require('../../utils/ApiError');
 const ApiResponse = require('../../utils/ApiResponse');
 const Product = require('../../models/product');
 const mongoose = require('mongoose');
-
+const Rental = require('../../models/rental');
 
 const getAllProducts = asyncHandler(async (req, res) => {
     const { category, subcategory, city, isAvailableForRent, page = 1, limit = 10 } = req.query;

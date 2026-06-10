@@ -20,7 +20,9 @@ const createRental = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Tenure must be at least 1 month');
     }
 
-    if (new Date(startDate) < new Date()) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (new Date(startDate) < today) {
         throw new ApiError(400, 'Start date cannot be in the past');
     }
 
@@ -120,76 +122,76 @@ const getRentalById = asyncHandler(async (req, res) => {
 });
 
 const updateRentalStatus = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, 'Invalid rental ID');
-  }
-  if (req.user.role !== 'admin') {
-    throw new ApiError(403, 'Access denied');
-  }
+    const { id } = req.params;
 
-  const { status } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid rental ID');
+    }
+    if (req.user.role !== 'admin') {
+        throw new ApiError(403, 'Access denied');
+    }
 
-  const rental = await Rental.findById(id);
-  if (!rental) throw new ApiError(404, 'Rental not found');
+    const { status } = req.body;
 
-  
-  const validTransitions = {
-    pending: ['active', 'cancelled'],
-    active: ['completed', 'cancelled'],
-    completed: [],
-    cancelled: []
-  };
-  if (!validTransitions[rental.status]?.includes(status)) {
-    throw new ApiError(400, `Cannot change status from ${rental.status} to ${status}`);
-  }
+    const rental = await Rental.findById(id);
+    if (!rental) throw new ApiError(404, 'Rental not found');
 
-  rental.status = status;
-  await rental.save({ validateBeforeSave: false });
 
-  if (['completed', 'cancelled'].includes(status)) {
-    await Product.findByIdAndUpdate(
-      rental.product,
-      { isAvailableForRent: true }
+    const validTransitions = {
+        pending: ['active', 'cancelled'],
+        active: ['completed', 'cancelled'],
+        completed: [],
+        cancelled: []
+    };
+    if (!validTransitions[rental.status]?.includes(status)) {
+        throw new ApiError(400, `Cannot change status from ${rental.status} to ${status}`);
+    }
+
+    rental.status = status;
+    await rental.save({ validateBeforeSave: false });
+
+    if (['completed', 'cancelled'].includes(status)) {
+        await Product.findByIdAndUpdate(
+            rental.product,
+            { isAvailableForRent: true }
+        );
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, rental, 'Rental status updated successfully')
     );
-  }
-
-  return res.status(200).json(
-    new ApiResponse(200, rental, 'Rental status updated successfully')
-  );
 });
 
 
 const cancelRental = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, 'Invalid rental ID');
-  }
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid rental ID');
+    }
 
-  const rental = await Rental.findById(id);
-  if (!rental) throw new ApiError(404, 'Rental not found');
+    const rental = await Rental.findById(id);
+    if (!rental) throw new ApiError(404, 'Rental not found');
 
-  if (rental.user.toString() !== req.user._id.toString()) {
-    throw new ApiError(403, 'Access denied');
-  }
+    if (rental.user.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, 'Access denied');
+    }
 
-  if (rental.status !== 'pending') {
-    throw new ApiError(400, `Cannot cancel a ${rental.status} rental`);
-  }
+    if (rental.status !== 'pending') {
+        throw new ApiError(400, `Cannot cancel a ${rental.status} rental`);
+    }
 
-  rental.status = 'cancelled';
-  await rental.save({ validateBeforeSave: false });
+    rental.status = 'cancelled';
+    await rental.save({ validateBeforeSave: false });
 
-  await Product.findByIdAndUpdate(
-    rental.product,
-    { isAvailableForRent: true }
-  );
+    await Product.findByIdAndUpdate(
+        rental.product,
+        { isAvailableForRent: true }
+    );
 
-  return res.status(200).json(
-    new ApiResponse(200, rental, 'Rental cancelled successfully')
-  );
+    return res.status(200).json(
+        new ApiResponse(200, rental, 'Rental cancelled successfully')
+    );
 });
 
 module.exports = {
