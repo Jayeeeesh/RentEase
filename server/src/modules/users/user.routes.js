@@ -7,7 +7,7 @@ const { updateProfileSchema, changePasswordSchema } = require('./user.validation
 const validate = require('../../middleware/validate.middleware');
 // Current logged-in user
 router.get('/me', authMiddleware, getProfile);
-router.patch('/me', authMiddleware, alidate(updateProfileSchema), updateProfile);
+router.patch('/me', authMiddleware, validate(updateProfileSchema), updateProfile);
 router.patch('/me/password', authMiddleware, validate(changePasswordSchema), changePassword);
 
 // Admin routes

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { createRental, getUserRentals, getRentalById, updateRentalStatus, cancelRental } = require('./rental.controller');
-const authMiddleware = require('../../middleware/auth.middleware');
+const { authMiddleware } = require('../../middleware/auth.middleware');
 
 // All rental routes require authentication
 router.get('/',               authMiddleware, getUserRentals);
