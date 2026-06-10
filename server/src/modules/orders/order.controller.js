@@ -3,6 +3,7 @@ const ApiError = require('../../utils/ApiError');
 const ApiResponse = require('../../utils/ApiResponse');
 const Order = require('../../models/order');
 const mongoose = require('mongoose');
+const Product = require('../../models/product');
 
 const createOrder = asyncHandler(async (req, res) => {
     const { products } = req.body;
@@ -14,11 +15,29 @@ const createOrder = asyncHandler(async (req, res) => {
         );
     }
 
-    const totalPrice = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const productIds = products.map(item => item.productId);
+    const dbProducts = await Product.find({ _id: { $in: productIds } });
+
+    if (dbProducts.length !== productIds.length) {
+        throw new ApiError(404, 'One or more products not found');
+    }
+
+    const enrichedProducts = products.map(item => {
+        const dbProduct = dbProducts.find(p => p._id.toString() === item.productId.toString());
+        return {
+            productId: item.productId,
+            name: dbProduct.name,
+            quantity: item.quantity,
+            price: dbProduct.monthlyRentalPrice
+        };
+    });
+
+
+    const totalPrice = enrichedProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     const order = await Order.create({
         userId: req.user._id,
-        products,
+        products: enrichedProducts,
         totalPrice,
     });
 
