@@ -21,9 +21,10 @@ const authSlice = createSlice({
     // Login / User fetch success
     authSuccess: (state, action) => {
       state.loading = false
-      state.user = action.payload
+      state.user = action.payload.user
       state.isAuthenticated = true
       state.error = null
+      localStorage.setItem('accessToken', action.payload.accessToken)
     },
 
     // Authentication failed
@@ -39,6 +40,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.loading = false
       state.error = null
+      localStorage.removeItem('accessToken')
     },
 
     // Clear error manually

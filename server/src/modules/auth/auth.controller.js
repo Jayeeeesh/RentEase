@@ -129,7 +129,7 @@ const logout = asyncHandler(async (req, res) => {
 
     // Find user in database and clear refresh token field
     await User.findByIdAndUpdate(
-        req.user._id,
+        userId,
         { refreshToken: null },
         { new: true }
     ); 
