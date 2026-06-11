@@ -36,7 +36,7 @@ const useAuth = () => {
         return data
       } catch (err) {
         dispatch(
-          authFailure(err.message || errorMessage)
+         authFailure(err.response?.data?.message || err.message || errorMessage)
         )
         throw err
       }
