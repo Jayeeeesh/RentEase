@@ -131,7 +131,7 @@ const logout = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         userId,
         { refreshToken: null },
-        { new: true }
+        { returnDocument: 'after' }
     ); 
 
     // Clear refresh token cookie from client
