@@ -1,19 +1,9 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { useCallback } from 'react'
 
-import {
-  authStart,
-  authSuccess,
-  authFailure,
-  logout,
-  clearError,
-} from '../features/auth/authSlice'
+import { authStart, authSuccess, authFailure, logout, clearError, } from '../features/auth/authSlice'
 
-import {
-  loginAPI,
-  registerAPI,
-  logoutAPI,
-} from '../features/auth/authAPI'
+import { loginAPI, registerAPI, logoutAPI } from '../features/auth/authAPI'
 
 const useAuth = () => {
   const dispatch = useDispatch()
