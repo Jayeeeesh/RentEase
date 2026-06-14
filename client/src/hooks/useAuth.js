@@ -8,12 +8,7 @@ import { loginAPI, registerAPI, logoutAPI } from '../features/auth/authAPI'
 const useAuth = () => {
   const dispatch = useDispatch()
 
-  const {
-    user,
-    isAuthenticated,
-    loading,
-    error,
-  } = useSelector((state) => state.auth)
+  const { user, isAuthenticated, loading, error, } = useSelector((state) => state.auth)
 
   const handleAuth = useCallback(
     async (apiCall, payload, errorMessage) => {
