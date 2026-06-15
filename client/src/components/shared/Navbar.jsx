@@ -25,6 +25,7 @@ const Navbar = () => {
                 {isAuthenticated ? (
                     <>
                         <span>Welcome, {user?.name}</span>
+                        <Link to="/my-orders">My Orders</Link>
 
                         <button
                             onClick={onLogout}
