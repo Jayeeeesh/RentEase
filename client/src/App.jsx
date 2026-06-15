@@ -4,7 +4,7 @@ import Register from './pages/Register'
 import MainLayout from './layouts/MainLayout'
 import ProductListing from './pages/ProductListing'
 import ProductDetail from './pages/ ProductDetail'
-import Home from './pages/home/home'
+import Home from './pages/home/Home'
 
 
 

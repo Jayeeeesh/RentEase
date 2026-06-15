@@ -4,7 +4,7 @@ import useAuth from '../../hooks/useAuth'
 import useProducts from '../../hooks/useProducts'
 import ProductCard from '../../components/productCard/ProductCard'
 import CategoryIcon from '../../components/UI/CategoryIcon'
-import './home'
+import './Home.css'
 
 const Home = () => {
   const { isAuthenticated } = useAuth()

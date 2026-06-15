@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import CategoryIcon from '../UI/CategoryIcon'
-import "./ProductCard"
+import "./ProductCard.css"
 
 const ProductCard = ({ product }) => {
   const {
