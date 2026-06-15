@@ -3,6 +3,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import MainLayout from './layouts/MainLayout'
 import ProductListing from './pages/ProductListing'
+import ProductDetail from './pages/ ProductDetail'
+import Home from './pages/home/home'
 
 
 
@@ -11,10 +13,11 @@ function App() {
     <BrowserRouter>
     <MainLayout>
       <Routes>
-        <Route path="/" element={<div>RentEase Home</div>} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/products" element={<ProductListing />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
       </Routes>
       </MainLayout>
     </BrowserRouter>

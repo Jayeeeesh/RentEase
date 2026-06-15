@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+@theme {
+  /* RentEase brand palette */
+  --color-ink: #1b1330;
+  --color-paper: #faf8f5;
+  --color-violet: #8b3dff;
+  --color-violet-soft: #c9a8ff;
+  --color-coral: #ff6b4d;
+  --color-line: #e7e1d8;
+  --color-muted: #8a8194;
+
+  /* RentEase type system */
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-tag: "Space Mono", ui-monospace, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;

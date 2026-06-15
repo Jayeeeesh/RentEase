@@ -1,0 +1,66 @@
+/* The "rental tag" — a luggage-tag shaped price badge.
+   It's the signature shape reused across the product card,
+   product detail page and the home page hero. */
+
+.rental-tag {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px 8px 22px;
+  border-radius: 4px 12px 12px 4px;
+  background: var(--color-violet);
+  color: #fff;
+  font-family: var(--font-tag);
+  line-height: 1.2;
+}
+
+.rental-tag::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-paper);
+  transform: translateY(-50%);
+}
+
+.rental-tag__price {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.rental-tag__price small {
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.rental-tag__meta {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+.rental-tag--lg {
+  padding: 14px 22px 14px 32px;
+  border-radius: 6px 18px 18px 6px;
+}
+
+.rental-tag--lg::before {
+  left: 13px;
+  width: 9px;
+  height: 9px;
+}
+
+.rental-tag--lg .rental-tag__price {
+  font-size: 1.5rem;
+}
+
+.rental-tag--lg .rental-tag__meta {
+  font-size: 0.7rem;
+}
