@@ -1,24 +1,55 @@
-import { useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import useAuth from '../hooks/useAuth'
-import useProducts from '../hooks/useProducts'
-import CategoryIcon from '../components/UI/CategoryIcon'
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import useProducts from "../hooks/useProducts";
+import CategoryIcon from "../components/UI/CategoryIcon";
+import { createOrderAPI } from "../features/orders/ordersAPI";
 
 const ProductDetail = () => {
-  const { id } = useParams()
-  const { isAuthenticated } = useAuth()
+  const { id } = useParams();
+  const { isAuthenticated } = useAuth();
   const {
     selectedProduct,
     loading,
     error,
     fetchProductById,
     clearCurrentProduct,
-  } = useProducts()
+  } = useProducts();
 
   useEffect(() => {
-    fetchProductById(id)
-    return () => clearCurrentProduct()
-  }, [id, fetchProductById, clearCurrentProduct])
+    fetchProductById(id);
+    return () => clearCurrentProduct();
+  }, [id, fetchProductById, clearCurrentProduct]);
+
+  const [orderState, setOrderState] = useState({
+    loading: false,
+    error: null,
+    success: false,
+  });
+
+  const handleRequestRent = async () => {
+    setOrderState({ loading: true, error: null, success: false });
+    try {
+      await createOrderAPI({
+        products: [
+          {
+            productId: selectedProduct._id,
+            name: selectedProduct.name,
+            price: selectedProduct.monthlyRentalPrice,
+            quantity: 1,
+          },
+        ],
+      });
+      setOrderState({ loading: false, error: null, success: true });
+    } catch (err) {
+      setOrderState({
+        loading: false,
+        error:
+          err.response?.data?.message || "Something went wrong. Try again.",
+        success: false,
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -31,7 +62,7 @@ const ProductDetail = () => {
           <div className="h-12 w-40 animate-pulse rounded bg-line/40" />
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !selectedProduct) {
@@ -41,7 +72,7 @@ const ProductDetail = () => {
           We couldn't find this product
         </p>
         <p className="mt-2 text-sm text-muted">
-          {error || 'It may have been removed or rented out.'}
+          {error || "It may have been removed or rented out."}
         </p>
         <Link
           to="/products"
@@ -50,7 +81,7 @@ const ProductDetail = () => {
           ← Back to all products
         </Link>
       </div>
-    )
+    );
   }
 
   const {
@@ -65,7 +96,7 @@ const ProductDetail = () => {
     minTenureMonths,
     maxTenureMonths,
     isAvailableForRent,
-  } = selectedProduct
+  } = selectedProduct;
 
   return (
     <div>
@@ -97,7 +128,7 @@ const ProductDetail = () => {
         <div>
           <div className="flex items-center justify-between">
             <p className="font-tag text-xs uppercase tracking-[0.15em] text-muted">
-              {(subcategory || category)?.replace('_', ' ')}
+              {(subcategory || category)?.replace("_", " ")}
             </p>
             {!isAvailableForRent && (
               <span className="rounded-full bg-coral/10 px-3 py-1 font-tag text-[0.65rem] uppercase tracking-wide text-coral">
@@ -126,11 +157,15 @@ const ProductDetail = () => {
           <dl className="mt-6 grid grid-cols-2 gap-4 border-y border-line py-4 text-sm">
             <div>
               <dt className="text-muted">Minimum tenure</dt>
-              <dd className="font-medium text-ink">{minTenureMonths} month{minTenureMonths > 1 ? 's' : ''}</dd>
+              <dd className="font-medium text-ink">
+                {minTenureMonths} month{minTenureMonths > 1 ? "s" : ""}
+              </dd>
             </div>
             <div>
               <dt className="text-muted">Maximum tenure</dt>
-              <dd className="font-medium text-ink">{maxTenureMonths} month{maxTenureMonths > 1 ? 's' : ''}</dd>
+              <dd className="font-medium text-ink">
+                {maxTenureMonths} month{maxTenureMonths > 1 ? "s" : ""}
+              </dd>
             </div>
           </dl>
 
@@ -141,16 +176,26 @@ const ProductDetail = () => {
           <div className="mt-8">
             {isAuthenticated ? (
               <>
-                <button
-                  type="button"
-                  disabled
-                  className="cursor-not-allowed rounded-lg bg-violet/50 px-6 py-3 text-sm font-medium text-white"
-                >
-                  Request to rent
-                </button>
-                <p className="mt-2 text-xs text-muted">
-                  Booking flow is launching soon — hang tight!
-                </p>
+                {orderState.success ? (
+                  <p className="rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                    Request sent! We'll get back to you soon.
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleRequestRent}
+                    disabled={orderState.loading || !isAvailableForRent}
+                    className="rounded-lg bg-violet px-6 py-3 text-sm font-medium text-white transition hover:bg-violet/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {orderState.loading
+                      ? "Sending request..."
+                      : "Request to rent"}
+                  </button>
+                )}
+
+                {orderState.error && (
+                  <p className="mt-2 text-xs text-coral">{orderState.error}</p>
+                )}
               </>
             ) : (
               <Link
@@ -164,7 +209,7 @@ const ProductDetail = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductDetail
+export default ProductDetail;
