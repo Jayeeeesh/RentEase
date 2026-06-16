@@ -7,9 +7,13 @@ import ProductDetail from "./pages/ ProductDetail";
 import Home from "./pages/home/Home";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
 import MyOrders from "./pages/MyOrders";
+import useInitAuth from './hooks/useInitAuth'
 
 function App() {
+  useInitAuth()
+  
   return (
+
     <BrowserRouter>
       <MainLayout>
         <Routes>

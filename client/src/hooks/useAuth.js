@@ -29,13 +29,7 @@ const useAuth = () => {
     [dispatch]
   )
 
-  const login = useCallback(
-    (credentials) =>
-      handleAuth(
-        loginAPI,
-        credentials,
-        'Login failed'
-      ),
+  const login = useCallback( (credentials) => handleAuth(loginAPI, credentials, 'Login failed'),
     [handleAuth]
   )
 
