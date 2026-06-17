@@ -1,43 +1,36 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
 
 const Navbar = () => {
-    const { user, isAuthenticated, handleLogout } = useAuth()
-    const navigate = useNavigate()
-
-    const onLogout = async () => {
-        try {
-            await handleLogout()
-        } catch (error) {
-            console.error(error)
-        } finally {
-            navigate('/login')
-        }
-    }
+    const { user, isAuthenticated } = useAuth()
 
     return (
-        <nav className="flex items-center justify-between px-6 py-4 shadow-md">
-            <Link to="/" className="text-xl font-bold">
+        <nav className="flex items-center justify-between px-6 py-4 border-b border-line bg-white">
+            <Link to="/" className="font-display text-lg font-semibold text-ink tracking-tight">
                 RentEase
             </Link>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
                 {isAuthenticated ? (
                     <>
-                        <span>Welcome, {user?.name}</span>
-                        <Link to="/my-orders">My Orders</Link>
-
-                        <button
-                            onClick={onLogout}
-                            className="px-4 py-2 bg-red-500 text-white rounded"
-                        >
-                            Logout
-                        </button>
+                        <Link to="/products" className="text-sm text-muted hover:text-ink transition">
+                            Products
+                        </Link>
+                        <Link to="/my-orders" className="text-sm text-muted hover:text-ink transition">
+                            My Orders
+                        </Link>
+                        <Link to="/profile" className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink hover:border-violet/50 hover:text-violet transition">
+                            {user?.name?.split(' ')[0] || 'Profile'}
+                        </Link>
                     </>
                 ) : (
                     <>
-                        <Link to="/login">Login</Link>
-                        <Link to="/register">Register</Link>
+                        <Link to="/login" className="text-sm text-muted hover:text-ink transition">
+                            Login
+                        </Link>
+                        <Link to="/register" className="rounded-lg bg-violet px-4 py-2 text-sm font-medium text-white hover:bg-violet/90 transition">
+                            Register
+                        </Link>
                     </>
                 )}
             </div>
