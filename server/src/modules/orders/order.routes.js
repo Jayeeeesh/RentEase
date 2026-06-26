@@ -8,6 +8,7 @@ const { createOrderSchema, updateOrderStatusSchema } = require('./order.validati
 router.get('/', authMiddleware, getUserOrders);
 router.post('/', authMiddleware, validate(createOrderSchema), createOrder);
 router.get('/:id', authMiddleware, getOrderById);
+router.patch('/:id/cancel', authMiddleware, cancelOrder);
 router.patch('/:id', authMiddleware, isAdmin, validate(updateOrderStatusSchema), updateOrderStatus)
 
 

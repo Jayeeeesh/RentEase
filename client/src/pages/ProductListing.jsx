@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import useProducts from '../hooks/useProducts'
 import ProductCard from '../components/productCard/ProductCard'
@@ -15,20 +15,36 @@ const PAGE_TITLES = {
 }
 
 const ProductListing = () => {
-  const { products, loading, error, fetchProducts } = useProducts()
+  const { products, pagination, loading, error, fetchProducts } = useProducts()
   const [searchParams, setSearchParams] = useSearchParams()
   const category = searchParams.get('category')
+  const city = searchParams.get('city') || ''
+  const page = Number(searchParams.get('page')) || 1
+  const [cityInput, setCityInput] = useState(city)
 
   useEffect(() => {
-    fetchProducts(category ? { category } : {})
-  }, [fetchProducts, category])
+    const params = { page, limit: 9 }
+    if (category) params.category = category
+    if (city) params.city = city
+    fetchProducts(params)
+  }, [fetchProducts, category, city, page])
+
+  const updateParams = (updates) => {
+    const next = new URLSearchParams(searchParams)
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) next.set(key, value)
+      else next.delete(key)
+    })
+    setSearchParams(next)
+  }
 
   const handleCategoryChange = (value) => {
-    if (value) {
-      setSearchParams({ category: value })
-    } else {
-      setSearchParams({})
-    }
+    updateParams({ category: value, page: null })
+  }
+
+  const handleCitySearch = (e) => {
+    e.preventDefault()
+    updateParams({ city: cityInput.trim() || null, page: null })
   }
 
   const isEmpty =
@@ -64,6 +80,34 @@ const ProductListing = () => {
             )
           })}
         </div>
+
+        <form onSubmit={handleCitySearch} className="mt-4 flex gap-2">
+          <input
+            type="text"
+            placeholder="Filter by city (e.g. Mumbai)"
+            value={cityInput}
+            onChange={(e) => setCityInput(e.target.value)}
+            className="flex-1 rounded-xl border border-line bg-white px-4 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-violet/40"
+          />
+          <button
+            type="submit"
+            className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/90"
+          >
+            Search
+          </button>
+          {city && (
+            <button
+              type="button"
+              onClick={() => {
+                setCityInput('')
+                updateParams({ city: null, page: null })
+              }}
+              className="rounded-xl border border-line px-4 py-2 text-sm text-muted hover:text-ink"
+            >
+              Clear
+            </button>
+          )}
+        </form>
       </header>
 
       {loading && (
@@ -92,11 +136,11 @@ const ProductListing = () => {
             No products here yet
           </p>
           <p className="mt-2 text-sm text-muted">
-            {category
-              ? "We don't have any listings in this category right now."
+            {category || city
+              ? "We don't have any listings matching your filters."
               : 'New listings are on the way — check back soon.'}
           </p>
-          {category && (
+          {(category || city) && (
             <Link
               to="/products"
               className="mt-4 inline-block text-sm font-medium text-violet"
@@ -108,11 +152,37 @@ const ProductListing = () => {
       )}
 
       {!loading && !isError && !isEmpty && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+
+          {pagination.totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => updateParams({ page: String(page - 1) })}
+                className="rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-muted">
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page >= pagination.totalPages}
+                onClick={() => updateParams({ page: String(page + 1) })}
+                className="rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

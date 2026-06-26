@@ -2,14 +2,13 @@ import { Navigate, useLocation } from "react-router-dom"
 import useAuth from "../../hooks/useAuth"
 
 const ProtectedRoute = ({ children }) => {
-    const { user, isAuthenticated, loading } = useAuth()
+    const { user, isAuthenticated, initializing } = useAuth()
     const location = useLocation()
 
-    // 1. Loading state (auth check running)
-    if (loading) {
+    if (initializing) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-gray-500">Checking authentication...</p>
+            <div className="min-h-[50vh] flex items-center justify-center">
+                <p className="text-sm text-muted">Checking authentication...</p>
             </div>
         )
     }

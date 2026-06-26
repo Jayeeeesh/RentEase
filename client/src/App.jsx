@@ -7,6 +7,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Home from "./pages/home/Home";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
 import MyOrders from "./pages/MyOrders";
+import MyRentals from "./pages/MyRentals";
 import Profile from "./pages/Profile";
 import useInitAuth from './hooks/useInitAuth'
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/products" element={<ProductListing />} />
           <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/my-rentals" element={ <ProtectedRoute><MyRentals /></ProtectedRoute> }/>
           <Route path="/my-orders" element={ <ProtectedRoute><MyOrders /></ProtectedRoute> }/>
            <Route path="/profile" element={ <ProtectedRoute><Profile /></ProtectedRoute> }/>
         </Routes>

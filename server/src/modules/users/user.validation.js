@@ -19,10 +19,14 @@ const updateProfileSchema = Joi.object({
             'string.uri': 'Avatar must be a valid URL',
         }),
 
-    address: Joi.string()
-        .trim()
-        .min(5)
-        .max(200),
+    address: Joi.object({
+        street: Joi.string().trim().min(3).max(100),
+        city: Joi.string().trim().min(2).max(50),
+        state: Joi.string().trim().min(2).max(50),
+        pincode: Joi.string().pattern(/^[1-9][0-9]{5}$/).messages({
+            'string.pattern.base': 'Invalid pincode',
+        }),
+    }),
 })
 .min(1)
 .messages({

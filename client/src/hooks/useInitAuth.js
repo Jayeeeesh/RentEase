@@ -8,6 +8,7 @@ const useInitAuth = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      dispatch(setInitializing(true))
       const token = localStorage.getItem('accessToken')
 
       // No token → user not logged in

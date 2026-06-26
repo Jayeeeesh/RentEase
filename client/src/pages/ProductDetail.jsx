@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useProducts from "../hooks/useProducts";
 import CategoryIcon from "../components/UI/CategoryIcon";
-import { createOrderAPI } from "../features/orders/ordersAPI";
+import { createRentalAPI } from "../features/rentals/rentalsAPI";
+
+const emptyAddress = { street: "", city: "", state: "", zipCode: "" };
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const {
     selectedProduct,
     loading,
@@ -16,33 +19,69 @@ const ProductDetail = () => {
     clearCurrentProduct,
   } = useProducts();
 
-  useEffect(() => {
-    fetchProductById(id);
-    return () => clearCurrentProduct();
-  }, [id, fetchProductById, clearCurrentProduct]);
-
-  const [orderState, setOrderState] = useState({
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    tenureMonths: "",
+    startDate: "",
+    deliveryAddress: { ...emptyAddress },
+  });
+  const [rentalState, setRentalState] = useState({
     loading: false,
     error: null,
     success: false,
   });
 
-  const handleRequestRent = async () => {
-    setOrderState({ loading: true, error: null, success: false });
+  useEffect(() => {
+    fetchProductById(id);
+    return () => clearCurrentProduct();
+  }, [id, fetchProductById, clearCurrentProduct]);
+
+  useEffect(() => {
+    if (user?.address) {
+      setForm((prev) => ({
+        ...prev,
+        deliveryAddress: {
+          street: user.address.street || "",
+          city: user.address.city || "",
+          state: user.address.state || "",
+          zipCode: user.address.pincode || "",
+        },
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedProduct?.minTenureMonths) {
+      setForm((prev) => ({
+        ...prev,
+        tenureMonths: String(selectedProduct.minTenureMonths),
+      }));
+    }
+  }, [selectedProduct]);
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      deliveryAddress: { ...prev.deliveryAddress, [name]: value },
+    }));
+  };
+
+  const handleSubmitRental = async (e) => {
+    e.preventDefault();
+    setRentalState({ loading: true, error: null, success: false });
+
     try {
-      await createOrderAPI({
-        products: [
-          {
-            productId: selectedProduct._id,
-            name: selectedProduct.name,
-            price: selectedProduct.monthlyRentalPrice,
-            quantity: 1,
-          },
-        ],
+      await createRentalAPI({
+        productId: selectedProduct._id,
+        tenureMonths: Number(form.tenureMonths),
+        startDate: form.startDate,
+        deliveryAddress: form.deliveryAddress,
       });
-      setOrderState({ loading: false, error: null, success: true });
+      setRentalState({ loading: false, error: null, success: true });
+      setTimeout(() => navigate("/my-rentals"), 2000);
     } catch (err) {
-      setOrderState({
+      setRentalState({
         loading: false,
         error:
           err.response?.data?.message || "Something went wrong. Try again.",
@@ -98,6 +137,9 @@ const ProductDetail = () => {
     isAvailableForRent,
   } = selectedProduct;
 
+  const tenure = Number(form.tenureMonths) || minTenureMonths;
+  const totalRent = monthlyRentalPrice * tenure;
+
   return (
     <div>
       <Link
@@ -108,7 +150,6 @@ const ProductDetail = () => {
       </Link>
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-        {/* Image */}
         <div className="flex aspect-4/3 items-center justify-center overflow-hidden rounded-2xl bg-paper">
           {images?.[0]?.url ? (
             <img
@@ -124,7 +165,6 @@ const ProductDetail = () => {
           )}
         </div>
 
-        {/* Details */}
         <div>
           <div className="flex items-center justify-between">
             <p className="font-tag text-xs uppercase tracking-[0.15em] text-muted">
@@ -176,30 +216,152 @@ const ProductDetail = () => {
           <div className="mt-8">
             {isAuthenticated ? (
               <>
-                {orderState.success ? (
-                  <p className="rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-                    Request sent! We'll get back to you soon.
-                  </p>
+                {rentalState.success ? (
+                  <div className="rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                    Rental request submitted! Redirecting to My Rentals...
+                  </div>
+                ) : showForm ? (
+                  <form
+                    onSubmit={handleSubmitRental}
+                    className="space-y-4 rounded-2xl border border-line bg-paper p-5"
+                  >
+                    <h2 className="font-display text-lg font-semibold text-ink">
+                      Rental details
+                    </h2>
+
+                    <div>
+                      <label className="block text-xs uppercase tracking-wide text-muted mb-1">
+                        Tenure (months)
+                      </label>
+                      <select
+                        value={form.tenureMonths}
+                        onChange={(e) =>
+                          setForm({ ...form, tenureMonths: e.target.value })
+                        }
+                        className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm"
+                        required
+                      >
+                        {Array.from(
+                          { length: maxTenureMonths - minTenureMonths + 1 },
+                          (_, i) => minTenureMonths + i
+                        ).map((m) => (
+                          <option key={m} value={m}>
+                            {m} month{m > 1 ? "s" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs uppercase tracking-wide text-muted mb-1">
+                        Start date
+                      </label>
+                      <input
+                        type="date"
+                        value={form.startDate}
+                        onChange={(e) =>
+                          setForm({ ...form, startDate: e.target.value })
+                        }
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm"
+                        required
+                      />
+                    </div>
+
+                    <fieldset className="space-y-3">
+                      <legend className="text-xs uppercase tracking-wide text-muted">
+                        Delivery address
+                      </legend>
+                      <input
+                        name="street"
+                        placeholder="Street address"
+                        value={form.deliveryAddress.street}
+                        onChange={handleAddressChange}
+                        className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm"
+                        required
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          name="city"
+                          placeholder="City"
+                          value={form.deliveryAddress.city}
+                          onChange={handleAddressChange}
+                          className="rounded-xl border border-line bg-white px-4 py-2.5 text-sm"
+                          required
+                        />
+                        <input
+                          name="state"
+                          placeholder="State"
+                          value={form.deliveryAddress.state}
+                          onChange={handleAddressChange}
+                          className="rounded-xl border border-line bg-white px-4 py-2.5 text-sm"
+                          required
+                        />
+                      </div>
+                      <input
+                        name="zipCode"
+                        placeholder="PIN code"
+                        pattern="^[1-9][0-9]{5}$"
+                        value={form.deliveryAddress.zipCode}
+                        onChange={handleAddressChange}
+                        className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm"
+                        required
+                      />
+                    </fieldset>
+
+                    <div className="rounded-xl bg-white p-4 text-sm">
+                      <div className="flex justify-between text-muted">
+                        <span>Rent ({tenure} mo)</span>
+                        <span>₹{totalRent.toLocaleString("en-IN")}</span>
+                      </div>
+                      <div className="mt-1 flex justify-between text-muted">
+                        <span>Security deposit</span>
+                        <span>₹{securityDeposit.toLocaleString("en-IN")}</span>
+                      </div>
+                      <div className="mt-2 flex justify-between border-t border-line pt-2 font-medium text-ink">
+                        <span>Total upfront</span>
+                        <span>
+                          ₹{(totalRent + securityDeposit).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        type="submit"
+                        disabled={rentalState.loading || !isAvailableForRent}
+                        className="flex-1 rounded-lg bg-violet px-6 py-3 text-sm font-medium text-white transition hover:bg-violet/90 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {rentalState.loading ? "Submitting..." : "Confirm rental"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowForm(false)}
+                        className="rounded-lg border border-line px-4 py-3 text-sm text-muted hover:text-ink"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    {rentalState.error && (
+                      <p className="text-xs text-coral">{rentalState.error}</p>
+                    )}
+                  </form>
                 ) : (
                   <button
                     type="button"
-                    onClick={handleRequestRent}
-                    disabled={orderState.loading || !isAvailableForRent}
+                    onClick={() => setShowForm(true)}
+                    disabled={!isAvailableForRent}
                     className="rounded-lg bg-violet px-6 py-3 text-sm font-medium text-white transition hover:bg-violet/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {orderState.loading
-                      ? "Sending request..."
-                      : "Request to rent"}
+                    Request to rent
                   </button>
-                )}
-
-                {orderState.error && (
-                  <p className="mt-2 text-xs text-coral">{orderState.error}</p>
                 )}
               </>
             ) : (
               <Link
                 to="/login"
+                state={{ from: { pathname: `/products/${id}` } }}
                 className="inline-block rounded-lg bg-violet px-6 py-3 text-sm font-medium text-white transition hover:bg-violet/90"
               >
                 Log in to request a rental

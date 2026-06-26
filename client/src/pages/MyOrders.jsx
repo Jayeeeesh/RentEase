@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getUserOrdersAPI } from '../features/orders/ordersAPI'
+import { cancelOrderAPI, getUserOrdersAPI } from '../features/orders/ordersAPI'
 
 const STATUS_STYLES = {
   pending: 'bg-amber-50 text-amber-700',
@@ -14,22 +14,37 @@ const MyOrders = () => {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [cancellingId, setCancellingId] = useState(null)
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await getUserOrdersAPI()
+      setOrders(result.data.orders)
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load orders')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const result = await getUserOrdersAPI()
-        setOrders(result.data.orders)
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load orders')
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchOrders()
-  }, [])
+  }, [fetchOrders])
+
+  const handleCancel = async (id) => {
+    if (!window.confirm('Cancel this order?')) return
+    setCancellingId(id)
+    try {
+      await cancelOrderAPI(id)
+      await fetchOrders()
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to cancel order')
+    } finally {
+      setCancellingId(null)
+    }
+  }
 
   const isEmpty = !loading && !error && orders.length === 0
 
@@ -123,6 +138,17 @@ const MyOrders = () => {
                   ₹{order.totalPrice.toLocaleString('en-IN')}/mo
                 </span>
               </div>
+
+              {order.status === 'pending' && (
+                <button
+                  type="button"
+                  onClick={() => handleCancel(order._id)}
+                  disabled={cancellingId === order._id}
+                  className="mt-3 text-sm font-medium text-coral hover:underline disabled:opacity-50"
+                >
+                  {cancellingId === order._id ? 'Cancelling...' : 'Cancel order'}
+                </button>
+              )}
             </div>
           ))}
         </div>

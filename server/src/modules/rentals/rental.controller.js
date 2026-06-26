@@ -49,7 +49,10 @@ const createRental = asyncHandler(async (req, res) => {
         tenureMonths,
         startDate,
         endDate: end,
-        deliveryAddress,
+        deliveryAddress: {
+            ...deliveryAddress,
+            country: deliveryAddress.country || 'India',
+        },
         totalAmount,
         securityDeposit: product.securityDeposit,
         status: 'pending'

@@ -27,7 +27,7 @@ const cookieOptions = {
 const register = asyncHandler(async (req, res) => {
 
     // Extract user credentials from request body
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
 
     // Normalize inputs: convert email to lowercase and trim whitespace to ensure consistency
     const normalizedEmail = email.toLowerCase().trim();
@@ -50,6 +50,7 @@ const register = asyncHandler(async (req, res) => {
         name: normalizedName,
         email: normalizedEmail,
         password: hashedPassword,
+        phone: phone?.trim(),
     });
 
     // Remove sensitive fields (password, refreshToken) from response using destructuring

@@ -16,6 +16,9 @@ const Navbar = () => {
                         <Link to="/products" className="text-sm text-muted hover:text-ink transition">
                             Products
                         </Link>
+                        <Link to="/my-rentals" className="text-sm text-muted hover:text-ink transition">
+                            My Rentals
+                        </Link>
                         <Link to="/my-orders" className="text-sm text-muted hover:text-ink transition">
                             My Orders
                         </Link>
