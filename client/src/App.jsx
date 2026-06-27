@@ -10,6 +10,7 @@ import MyOrders from "./pages/MyOrders";
 import MyRentals from "./pages/MyRentals";
 import Profile from "./pages/Profile";
 import useInitAuth from './hooks/useInitAuth'
+import Maintenance from './pages/Maintenance'
 
 function App() {
   useInitAuth()
@@ -27,6 +28,7 @@ function App() {
           <Route path="/my-rentals" element={ <ProtectedRoute><MyRentals /></ProtectedRoute> }/>
           <Route path="/my-orders" element={ <ProtectedRoute><MyOrders /></ProtectedRoute> }/>
            <Route path="/profile" element={ <ProtectedRoute><Profile /></ProtectedRoute> }/>
+           <Route path="/maintenance" element={<ProtectedRoute><Maintenance /></ProtectedRoute>} />
         </Routes>
       </MainLayout>
     </BrowserRouter>

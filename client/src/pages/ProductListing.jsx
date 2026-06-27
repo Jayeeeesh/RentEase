@@ -1,55 +1,56 @@
-import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import useProducts from '../hooks/useProducts'
-import ProductCard from '../components/productCard/ProductCard'
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import useProducts from "../hooks/useProducts";
+import ProductCard from "../components/productCard/ProductCard";
 
 const CATEGORIES = [
-  { label: 'All', value: null },
-  { label: 'Furniture', value: 'furniture' },
-  { label: 'Appliances', value: 'appliance' },
-]
+  { label: "All", value: null },
+  { label: "Furniture", value: "furniture" },
+  { label: "Appliances", value: "appliance" },
+];
 
 const PAGE_TITLES = {
-  furniture: 'Furniture for rent',
-  appliance: 'Appliances for rent',
-}
+  furniture: "Furniture for rent",
+  appliance: "Appliances for rent",
+};
 
 const ProductListing = () => {
-  const { products, pagination, loading, error, fetchProducts } = useProducts()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const category = searchParams.get('category')
-  const city = searchParams.get('city') || ''
-  const page = Number(searchParams.get('page')) || 1
-  const [cityInput, setCityInput] = useState(city)
+  const { products, pagination, loading, error, fetchProducts } = useProducts();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const category = searchParams.get("category");
+  const city = searchParams.get("city") || "";
+  const page = Number(searchParams.get("page")) || 1;
+  const [cityInput, setCityInput] = useState(city);
 
   useEffect(() => {
-    const params = { page, limit: 9 }
-    if (category) params.category = category
-    if (city) params.city = city
-    fetchProducts(params)
-  }, [fetchProducts, category, city, page])
+    const params = { page, limit: 9 };
+    if (category) params.category = category;
+    if (city) params.city = city;
+    fetchProducts(params);
+  }, [fetchProducts, category, city, page]);
 
   const updateParams = (updates) => {
-    const next = new URLSearchParams(searchParams)
+    const next = new URLSearchParams(searchParams);
     Object.entries(updates).forEach(([key, value]) => {
-      if (value) next.set(key, value)
-      else next.delete(key)
-    })
-    setSearchParams(next)
-  }
+      if (value) next.set(key, value);
+      else next.delete(key);
+    });
+    setSearchParams(next);
+  };
 
   const handleCategoryChange = (value) => {
-    updateParams({ category: value, page: null })
-  }
+    updateParams({ category: value, page: null });
+  };
 
   const handleCitySearch = (e) => {
-    e.preventDefault()
-    updateParams({ city: cityInput.trim() || null, page: null })
-  }
+    e.preventDefault();
+    updateParams({ city: cityInput.trim() || null, page: null });
+  };
 
   const isEmpty =
-    !loading && (error === 'No products found' || (!error && products.length === 0))
-  const isError = !loading && error && error !== 'No products found'
+    !loading &&
+    (error === "No products found" || (!error && products.length === 0));
+  const isError = !loading && error && error !== "No products found";
 
   return (
     <div>
@@ -58,12 +59,12 @@ const ProductListing = () => {
           Browse
         </p>
         <h1 className="mt-2 font-display text-2xl font-semibold text-ink md:text-3xl">
-          {PAGE_TITLES[category] || 'All products'}
+          {PAGE_TITLES[category] || "All products"}
         </h1>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {CATEGORIES.map(({ label, value }) => {
-            const isActive = category === value || (!category && !value)
+            const isActive = category === value || (!category && !value);
             return (
               <button
                 key={label}
@@ -71,13 +72,13 @@ const ProductListing = () => {
                 onClick={() => handleCategoryChange(value)}
                 className={`rounded-full border px-4 py-1.5 text-sm transition ${
                   isActive
-                    ? 'border-violet bg-violet text-white'
-                    : 'border-line bg-white text-muted hover:border-violet/40 hover:text-ink'
+                    ? "border-violet bg-violet text-white"
+                    : "border-line bg-white text-muted hover:border-violet/40 hover:text-ink"
                 }`}
               >
                 {label}
               </button>
-            )
+            );
           })}
         </div>
 
@@ -99,8 +100,8 @@ const ProductListing = () => {
             <button
               type="button"
               onClick={() => {
-                setCityInput('')
-                updateParams({ city: null, page: null })
+                setCityInput("");
+                updateParams({ city: null, page: null });
               }}
               className="rounded-xl border border-line px-4 py-2 text-sm text-muted hover:text-ink"
             >
@@ -138,7 +139,7 @@ const ProductListing = () => {
           <p className="mt-2 text-sm text-muted">
             {category || city
               ? "We don't have any listings matching your filters."
-              : 'New listings are on the way — check back soon.'}
+              : "New listings are on the way — check back soon."}
           </p>
           {(category || city) && (
             <Link
@@ -160,32 +161,32 @@ const ProductListing = () => {
           </div>
 
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
+            <div className="mt-10 flex items-center justify-center gap-3">
               <button
                 type="button"
                 disabled={page <= 1}
                 onClick={() => updateParams({ page: String(page - 1) })}
-                className="rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40"
+                className="rounded-xl border border-line px-5 py-2 text-sm font-medium text-ink hover:border-violet/40 hover:text-violet transition disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Previous
+                ← Prev
               </button>
-              <span className="text-sm text-muted">
-                Page {pagination.page} of {pagination.totalPages}
+              <span className="font-tag text-xs uppercase tracking-widest text-muted px-2">
+                {pagination.page} / {pagination.totalPages}
               </span>
               <button
                 type="button"
                 disabled={page >= pagination.totalPages}
                 onClick={() => updateParams({ page: String(page + 1) })}
-                className="rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40"
+                className="rounded-xl border border-line px-5 py-2 text-sm font-medium text-ink hover:border-violet/40 hover:text-violet transition disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Next
+                Next →
               </button>
             </div>
           )}
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProductListing
+export default ProductListing;
