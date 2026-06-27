@@ -13,6 +13,14 @@ const registerSchema = Joi.object({
         .email()
         .required(),
 
+    phone: Joi.string()
+        .trim()
+        .pattern(/^[6-9]\d{9}$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Invalid phone number',
+        }),
+
     password: Joi.string()
         .min(8)
         .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)

@@ -5,8 +5,7 @@ import api from '../services/api'
 import { authSuccess } from '../features/auth/authSlice'
 import { useDispatch } from 'react-redux'
 
-// ─── Small reusable input ────────────────────────────────────────────────────
-const Field = ({ label, name, type = 'text', value, onChange, disabled }) => (
+const Field = ({ label, name, type = 'text', value, onChange, disabled, pattern, placeholder }) => (
   <div>
     <label className="block font-tag text-[10px] uppercase tracking-[0.18em] text-muted mb-1.5">
       {label}
@@ -17,6 +16,8 @@ const Field = ({ label, name, type = 'text', value, onChange, disabled }) => (
       value={value}
       onChange={onChange}
       disabled={disabled}
+      pattern={pattern}
+      placeholder={placeholder}
       className="w-full rounded-xl border border-line bg-paper px-4 py-2.5 text-sm text-ink placeholder-muted
                  focus:outline-none focus:ring-2 focus:ring-violet/40 focus:border-violet
                  disabled:opacity-50 disabled:cursor-not-allowed transition"
@@ -24,7 +25,6 @@ const Field = ({ label, name, type = 'text', value, onChange, disabled }) => (
   </div>
 )
 
-// ─── Status banner ───────────────────────────────────────────────────────────
 const Banner = ({ type, msg }) => {
   if (!msg) return null
   const styles =
@@ -36,7 +36,6 @@ const Banner = ({ type, msg }) => {
   )
 }
 
-// ─── Section wrapper ─────────────────────────────────────────────────────────
 const Section = ({ title, children }) => (
   <div className="rounded-2xl border border-line bg-white p-6 space-y-5">
     <h2 className="font-display text-lg font-semibold text-ink">{title}</h2>
@@ -44,22 +43,24 @@ const Section = ({ title, children }) => (
   </div>
 )
 
-// ─── Main component ───────────────────────────────────────────────────────────
 const Profile = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { user, handleLogout } = useAuth()
 
-  // ── Profile edit state ──
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
-    address: user?.address || '',
+    address: {
+      street: user?.address?.street || '',
+      city: user?.address?.city || '',
+      state: user?.address?.state || '',
+      pincode: user?.address?.pincode || '',
+    },
   })
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileMsg, setProfileMsg] = useState({ type: '', text: '' })
 
-  // ── Password change state ──
   const [pwForm, setPwForm] = useState({
     oldPassword: '',
     newPassword: '',
@@ -73,9 +74,14 @@ const Profile = () => {
     return null
   }
 
-  // ── Handlers ──
   const handleProfileChange = (e) =>
     setProfileForm({ ...profileForm, [e.target.name]: e.target.value })
+
+  const handleAddressChange = (e) =>
+    setProfileForm({
+      ...profileForm,
+      address: { ...profileForm.address, [e.target.name]: e.target.value },
+    })
 
   const handlePwChange = (e) =>
     setPwForm({ ...pwForm, [e.target.name]: e.target.value })
@@ -132,10 +138,8 @@ const Profile = () => {
     navigate('/')
   }
 
-  // ── Render ──
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      {/* Page header */}
       <header className="flex items-start justify-between">
         <div>
           <p className="font-tag text-xs uppercase tracking-[0.2em] text-violet">
@@ -154,7 +158,6 @@ const Profile = () => {
         </button>
       </header>
 
-      {/* Read-only info card */}
       <Section title="Account info">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -186,7 +189,6 @@ const Profile = () => {
         </div>
       </Section>
 
-      {/* Edit profile form */}
       <Section title="Edit profile">
         <form onSubmit={handleProfileSubmit} className="space-y-4">
           <Banner type={profileMsg.type} msg={profileMsg.text} />
@@ -203,14 +205,44 @@ const Profile = () => {
             value={profileForm.phone}
             onChange={handleProfileChange}
             disabled={profileLoading}
+            pattern="^[6-9]\d{9}$"
           />
-          <Field
-            label="Address"
-            name="address"
-            value={profileForm.address}
-            onChange={handleProfileChange}
-            disabled={profileLoading}
-          />
+          <fieldset className="space-y-3">
+            <legend className="font-tag text-[10px] uppercase tracking-[0.18em] text-muted">
+              Address
+            </legend>
+            <Field
+              label="Street"
+              name="street"
+              value={profileForm.address.street}
+              onChange={handleAddressChange}
+              disabled={profileLoading}
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field
+                label="City"
+                name="city"
+                value={profileForm.address.city}
+                onChange={handleAddressChange}
+                disabled={profileLoading}
+              />
+              <Field
+                label="State"
+                name="state"
+                value={profileForm.address.state}
+                onChange={handleAddressChange}
+                disabled={profileLoading}
+              />
+            </div>
+            <Field
+              label="Pincode"
+              name="pincode"
+              value={profileForm.address.pincode}
+              onChange={handleAddressChange}
+              disabled={profileLoading}
+              pattern="^[1-9][0-9]{5}$"
+            />
+          </fieldset>
           <button
             type="submit"
             disabled={profileLoading}
@@ -222,7 +254,6 @@ const Profile = () => {
         </form>
       </Section>
 
-      {/* Change password form */}
       <Section title="Change password">
         <form onSubmit={handlePwSubmit} className="space-y-4">
           <Banner type={pwMsg.type} msg={pwMsg.text} />

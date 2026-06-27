@@ -4,6 +4,7 @@ const initialState = {
   user: null,
   isAuthenticated: false,
   loading: false,
+  initializing: true,
   error: null,
 };
 
@@ -44,7 +45,12 @@ const authSlice = createSlice({
     },
 
     setInitializing: (state, action) => {
-      state.loading = action.payload; // true ya false
+      state.initializing = action.payload;
+    },
+
+    registerSuccess: (state) => {
+      state.loading = false;
+      state.error = null;
     },
 
     // Clear error manually
@@ -60,6 +66,7 @@ export const {
   authFailure,
   logout,
   setInitializing,
+  registerSuccess,
   clearError,
 } = authSlice.actions;
 
