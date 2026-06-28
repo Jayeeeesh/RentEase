@@ -11,6 +11,7 @@ import MyRentals from "./pages/MyRentals";
 import Profile from "./pages/Profile";
 import useInitAuth from './hooks/useInitAuth'
 import Maintenance from './pages/Maintenance'
+import AdminDashboard from './pages/admin/AdminDashboard'
 
 function App() {
   useInitAuth()
@@ -28,6 +29,7 @@ function App() {
           <Route path="/my-rentals" element={ <ProtectedRoute><MyRentals /></ProtectedRoute> }/>
           <Route path="/my-orders" element={ <ProtectedRoute><MyOrders /></ProtectedRoute> }/>
            <Route path="/profile" element={ <ProtectedRoute><Profile /></ProtectedRoute> }/>
+           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
            <Route path="/maintenance" element={<ProtectedRoute><Maintenance /></ProtectedRoute>} />
         </Routes>
       </MainLayout>

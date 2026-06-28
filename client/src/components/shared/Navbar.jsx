@@ -57,6 +57,14 @@ const Navbar = () => {
               >
                 {user?.name?.split(" ")[0] || "Profile"}
               </Link>
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin"
+                  className="rounded-lg border border-violet/40 px-4 py-2 text-sm font-medium text-violet hover:bg-violet hover:text-white transition"
+                >
+                  Admin
+                </Link>
+              )}
             </>
           ) : (
             <>
@@ -163,6 +171,15 @@ const Navbar = () => {
               >
                 {user?.name?.split(" ")[0] || "Profile"}
               </Link>
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin"
+                  onClick={close}
+                  className="px-4 py-3 rounded-xl text-sm font-medium text-violet hover:bg-violet/10 transition"
+                >
+                  Admin dashboard
+                </Link>
+              )}
             </>
           ) : (
             <>
